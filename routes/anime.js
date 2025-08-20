@@ -124,6 +124,15 @@ router.get('/:slug/episode/:episode', async (req, res) => {
     );
     const getEpisodeDetails = await animeApi.getEpisodeDetails(slug, episodeNumber);
     console.log(episodeData.next_episode);
+    const modifiedStreamList = {};
+    var qlist = [];
+    qlist.push(360);
+    modifiedStreamList[parseInt('360')] = `/stream?url=${getEpisodeDetails.stream_url}`;
+    for (const quality in getEpisodeDetails.steramList) {
+      qlist.push(parseInt(quality.replace('p', '')));
+      modifiedStreamList[parseInt(quality.replace('p', ''))] = `/stream?url=${getEpisodeDetails.steramList[quality]}`;
+    }
+    
     var episodeDatas = {
         title: `${sanitizedAnime.title} Episode ${episodeNumber} - KitaNime`,
         description: `Nonton ${sanitizedAnime.title} Episode ${episodeNumber} subtitle Indonesia`,
@@ -132,6 +141,8 @@ router.get('/:slug/episode/:episode', async (req, res) => {
           number: episodeNumber,
           title: episodeData.episode_title || `Episode ${episodeNumber}`,
           video_sources: `/stream?url=${getEpisodeDetails.stream_url}` || [],
+          qlist,
+          quality: modifiedStreamList || [],
           subtitles: episodeData.stream_url || [],
           download_links: getEpisodeDetails.download_urls || []
         },
