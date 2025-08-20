@@ -38,7 +38,8 @@ block content
                   each source in episode.video_sources
                     source(src=source.url || source type=source.type || "video/mp4")
                 else
-                  source(src=episode.video_sources type="video/mp4")
+                  each source in episode.qlist
+                    source(src=episode.quality[source] type="video/mp4" size=source)
               
               p(class="text-white text-center p-4") Browser Anda tidak mendukung video player.
 
@@ -204,15 +205,16 @@ block scripts
     autonexteps.addEventListener('change', (e) => {
       localStorage.setItem('AutoPlayNextEpisode', e.target.checked);
     });
-
+    const source = !{JSON.stringify(episode.quality)}
     const player = new Plyr('#player', {
       autoplay: false,
       muted: true,
       controls: ['play-large', 'play', 'progress', 'current-time', 'duration', 'mute', 'volume', 'settings', 'fullscreen'],
       settings: ['quality', 'speed'],
       quality: {
-        default: 'auto',
-        options: ['auto', '1080', '720', '480', '360']
+        default: 360,
+        options: !{JSON.stringify(episode.qlist)},
+        forced: true,
       },
       speed: {
         selected: 1,
@@ -245,7 +247,6 @@ block scripts
       clickToPlay: true,
       disableContextMenu: false
     });
-
     const video = player.media;
     const playerContainer = document.querySelector('#player');
     const loadingOverlay = document.getElementById('playerLoading');
@@ -296,6 +297,19 @@ block scripts
       }
     });
 
+    player.on('qualitychange', event => {
+      const newQuality = event.detail.quality;
+      console.log('User pilih kualitas:', newQuality);
+
+      const currentTime = player.currentTime;
+      const isPlaying = !player.paused;
+
+      player.source = {
+          type: 'video',
+          sources: [{ src: source[newQuality], type: 'video/mp4', size: newQuality }]
+      };
+    });
+
     player.on('canplay', event => {
       console.log('Video can start playing');
       loadingOverlay.style.opacity = '0';
@@ -305,9 +319,9 @@ block scripts
     });
 
     player.on('ready', event => {
-      console.log('Plyr is ready');
       player.volume = 0.8;
       player.elements.container.focus();
+      console.log('Plyr is ready');
     });
 
     player.on('timeupdate', event => {
