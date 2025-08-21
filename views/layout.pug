@@ -7,15 +7,37 @@ html(lang="id" class="scroll-smooth")
     meta(name="description" content=description || "Nonton anime subtitle Indonesia terlengkap dan terbaru")
     meta(name="keywords" content="anime, streaming, subtitle indonesia, nonton anime, anime sub indo")
     link(rel="icon" href="/images/favicon.ico" onerror="this.onerror=null;this.src='https://placehold.co/400';")
+    link(rel="canonical" href="https://d5studio.my.id")
     
-    meta(property="og:title" content=title)
-    meta(property="og:description" content=description)
+    meta(property="og:title" content=title || "KitaNime - Streaming Anime Subtitle Indonesia")
+    meta(property="og:description" content=description || "Nonton anime subtitle Indonesia terlengkap dan terbaru")
     meta(property="og:type" content="website")
+    meta(property="og:url" content="https://d5studio.my.id")
     meta(property="og:site_name" content="KitaNime")
+    meta(property="og:image" content="https://d5studio.my.id/images/logo.png")
     
     meta(name="twitter:card" content="summary_large_image")
-    meta(name="twitter:title" content=title)
-    meta(name="twitter:description" content=description)
+    meta(name="twitter:title" content=title || "KitaNime - Streaming Anime Subtitle Indonesia")
+    meta(name="twitter:description" content=description || "Nonton anime subtitle Indonesia terlengkap dan terbaru")
+    meta(name="twitter:image" content="https://d5studio.my.id/images/logo.png")
+    script(type="application/ld+json").
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "KitaNime",
+          "url": "https://d5studio.my.id",
+          "logo": "https://d5studio.my.id/images/logo.png",
+          "sameAs": [
+              "https://www.facebook.com/rrq.ikz",
+              "https://www.instagram.com/d5studio"
+          ],
+          "contactPoint": {
+              "@type": "ContactPoint",
+              "telephone": "+62-8578-1866-785",
+              "contactType": "customer service",
+              "areaServed": "ID"
+          }
+        }
     
     link(rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css")
     script(src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js")
