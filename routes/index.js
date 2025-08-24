@@ -218,6 +218,48 @@ router.get('/movies/:year/:month/:slug', async (req, res) => {
   }
 });
 
+router.get('/robots.txt', (req, res) => {
+  const baseUrl = `${req.protocol}://${req.get('host')}`;
+  
+  const robotsTxt = `# KitaNime - Streaming Anime Subtitle Indonesia
+# Website: ${baseUrl}
+# Generated: ${new Date().toISOString()}
+User-agent: *
+Allow: /
+User-agent: Googlebot
+Allow: /
+User-agent: Bingbot
+Allow: /
+User-agent: Slurp
+Allow: /
+User-agent: DuckDuckBot
+Allow: /
+User-agent: Baiduspider
+Allow: /
+User-agent: YandexBot
+Allow: /
+User-agent: facebookexternalhit
+Allow: /
+User-agent: Twitterbot
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /private/
+Disallow: /temp/
+Disallow: /cache/
+Disallow: /*.json$
+Disallow: /*.log$
+Allow: /images/
+Allow: /css/
+Allow: /js/
+Allow: /fonts/
+Crawl-delay: 1
+Sitemap: ${baseUrl}/sitemap.xml`;
+
+  res.set('Content-Type', 'text/plain');
+  res.send(robotsTxt);
+});
+
 router.get('/sitemap.xml', async (req, res) => {
   try {
     const baseUrl = `${req.protocol}://${req.get('host')}`;
