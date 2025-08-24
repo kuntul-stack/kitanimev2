@@ -5,22 +5,79 @@ html(lang="id" class="scroll-smooth")
     meta(name="viewport" content="width=device-width, initial-scale=1.0")
     title= title || "KitaNime - Streaming Anime Subtitle Indonesia"
     meta(name="description" content=description || "Nonton anime subtitle Indonesia terlengkap dan terbaru")
-    meta(name="keywords" content="anime, streaming, subtitle indonesia, nonton anime, anime sub indo")
+    meta(name="keywords" content="kitanime, KitaNime, anime, streaming anime, subtitle indonesia, nonton anime, anime sub indo, anime indonesia, streaming anime gratis, anime terbaru, anime ongoing, anime complete, anime movie, download anime, watch anime online, anime HD, otaku indonesia")
+    meta(name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1")
+    meta(name="google-site-verification" content="KYZb3rNH5REPdVtPCSei_EhvxVJDmX7zd1KVWn49M_k")
+    meta(name="language" content="Indonesian")
+    meta(http-equiv="content-language" content="id-ID")
+    meta(name="author" content="IkuzaDev")
+    meta(name="publisher" content="D5studioID")
+    meta(name="copyright" content="© 2025 KitaNime. All rights reserved.")
     meta(name="google-adsense-account" content="ca-pub-7452678962186302")
     link(rel="icon" href="/images/favicon.ico" onerror="this.onerror=null;this.src='https://placehold.co/400';")
+    link(rel="dns-prefetch" href="//d5studio.my.id")  
     link(rel="canonical" href="https://d5studio.my.id")
+    link(rel="alternate" hreflang="id" href=`https://d5studio.my.id${url || '/'}`)
+    link(rel="alternate" hreflang="x-default" href=`https://d5studio.my.id${url || '/'}`)
+    link(rel="icon" type="image/x-icon" href="/images/favicon.ico")
+    link(rel="icon" type="image/png" sizes="32x32" href="/images/logo.png")
+    link(rel="icon" type="image/png" sizes="16x16" href="/images/logo.png")
+    link(rel="apple-touch-icon" sizes="180x180" href="/images/logo.png")
+
+    meta(http-equiv="X-UA-Compatible" content="IE=edge")
+    meta(name="format-detection" content="telephone=no")
+    meta(name="theme-color" content="#8b5cf6")
+    meta(name="msapplication-TileColor" content="#8b5cf6")
+
+    link(rel="preconnect" href="https://fonts.googleapis.com")
+    link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin)
+    link(rel="preconnect" href="https://cdn.plyr.io")
+    link(rel="preconnect" href="https://cdn.tailwindcss.com")
     
-    meta(property="og:title" content=title || "KitaNime - Streaming Anime Subtitle Indonesia")
-    meta(property="og:description" content=description || "Nonton anime subtitle Indonesia terlengkap dan terbaru")
+    meta(property="og:title" content=title)
+    meta(property="og:description" content=description)
     meta(property="og:type" content="website")
     meta(property="og:url" content="https://d5studio.my.id")
     meta(property="og:site_name" content="KitaNime")
     meta(property="og:image" content="https://d5studio.my.id/images/logo.png")
     
     meta(name="twitter:card" content="summary_large_image")
-    meta(name="twitter:title" content=title || "KitaNime - Streaming Anime Subtitle Indonesia")
-    meta(name="twitter:description" content=description || "Nonton anime subtitle Indonesia terlengkap dan terbaru")
+    meta(name="twitter:title" content=title)
+    meta(name="twitter:description" content=description)
     meta(name="twitter:image" content="https://d5studio.my.id/images/logo.png")
+    script(type="application/ld+json").
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "KitaNime",
+        "alternateName": "KitaNime - Streaming Anime Sub Indo",
+        "url": "https://d5studio.my.id",
+        "description": "Platform streaming anime subtitle Indonesia terlengkap dan terbaru. Nikmati ribuan anime berkualitas tinggi dengan subtitle Indonesia.",
+        "inLanguage": "id-ID",
+        "publisher": {
+          "@type": "Organization",
+          "name": "KitaNime",
+          "url": "https://d5studio.my.id",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://d5studio.my.id/images/logo.png",
+            "width": 400,
+            "height": 400
+          }
+        },
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": {
+            "@type": "EntryPoint",
+            "urlTemplate": "https://d5studio.my.id/search?q={search_term_string}"
+          },
+          "query-input": "required name=search_term_string"
+        },
+        "sameAs": [
+          "https://twitter.com/KitaNime",
+          "https://facebook.com/KitaNime"
+        ]
+      }
     script(type="application/ld+json").
         {
           "@context": "https://schema.org",
