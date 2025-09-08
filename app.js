@@ -80,6 +80,7 @@ app.get('/stream', async (req, res) => {
           'Access-Control-Allow-Credentials': 'true',
       },
     });
+    console.log(iframeRes.data);
     const match = iframeRes.data.match(/file:"([^"]+)"/)[1];
     const host = new URL(match).hostname;
     const response = await axios.get(match, {
