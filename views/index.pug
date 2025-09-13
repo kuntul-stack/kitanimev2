@@ -102,10 +102,15 @@ block content
           h3(class="font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center")
             svg(class="w-5 h-5 mr-2 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24")
               path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.99 1.99 0 013 12V7a4 4 0 014-4z")
-            span Genre Populer
-          div(class="flex flex-wrap gap-2")
-            each genre in []
-              a(href=`/genres/${genre.toLowerCase()}` class="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm rounded-full hover:bg-primary-100 dark:hover:bg-primary-900 hover:text-primary-700 dark:hover:text-primary-300 transition-colors duration-200")= genre
+            span Donasi Kitanime
+          div(class="flex flex-col gap-4 items-center w-full")
+            form(action="/" method="POST" class="flex items-center gap-3 w-full max-w-md" id="donasi")
+              input(type="number" name="price" placeholder="Masukan nominal" class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-200" autocomplete="off" step="1000" min="1000" id="nominal")
+              button(type="submit" class="p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200") Pay
+            if qrcode
+              div(class="flex justify-center items-center p-4 bg-white rounded-2xl shadow-md w-full max-w-md")
+                div(id="qrcode")
+              p(class="text-primary-800 dark:text-primary-200 text-sm leading-relaxed")= expired
 
         if adSlots && adSlots.sidebarBottom && adSlots.sidebarBottom.length > 0
           div(class="mb-6")
@@ -121,6 +126,19 @@ block content
 
 block scripts
   script.
+    const qrcode = #{"'" + qrcode+ "'"} ;
+    console.log(qrcode);
+
+    if(qrcode){
+      new QRCode(document.getElementById('qrcode'), {text: qrcode, width: 180, height: 180, colorDark: "#000000",colorLight: "#ffffff"})
+    }
+
+    document.getElementById('donasi').addEventListener("submit", function (e) {
+      const nominal = document.getElementById('nominal').value;
+      if(nominal < 1000){
+        document.getElementById('nominal').value = 10000;
+      }
+    });
     if ('IntersectionObserver' in window) {
       const imageObserver = new IntersectionObserver((entries, observer) => {
         entries.forEach(entry => {
