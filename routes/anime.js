@@ -126,11 +126,9 @@ router.get('/:slug/episode/:episode', async (req, res) => {
     console.log(episodeData.next_episode);
     const modifiedStreamList = {};
     var qlist = [];
-    qlist.push(360);
-    modifiedStreamList[parseInt('360')] = `/stream?url=${getEpisodeDetails.stream_url}`;
     for (const quality in getEpisodeDetails.steramList) {
       qlist.push(parseInt(quality.replace('p', '')));
-      modifiedStreamList[parseInt(quality.replace('p', ''))] = `/stream?url=${getEpisodeDetails.steramList[quality]}`;
+      modifiedStreamList[parseInt(quality.replace('p', ''))] = `${getEpisodeDetails.steramList[quality]}`;
     }
     
     var episodeDatas = {
