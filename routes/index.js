@@ -32,6 +32,69 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.post('/', async(req, res) => {
+  if(req.body.price){
+    const {price} = req.body;
+    try{
+      const homeData = await animeApi.getHomeData();
+      const siteTitle = await getSetting('site_title') || 'KitaNime - Streaming Anime Subtitle Indonesia';
+      const siteDescription = await getSetting('site_description') || 'Nonton anime subtitle Indonesia terlengkap dan terbaru';
+      const headers = {
+        "Accept": "*/*",
+        "Accept-Encoding": "deflate, gzip",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+        "Host": "app.pakasir.com"
+      }
+      let payload = { 
+        project: "webcheckerforwebstreaming",
+        amount: parseInt(price),
+        order_id: `DKN-${Math.floor(Date.now() / 1000)}-${Math.random().toString(36).slice(2, 6)}`
+      }
+      const paymentData = await axios.post("https://app.pakasir.com/api/transactions", payload, { headers });
+      const user_id = paymentData.data.transaction.id;
+  
+      const payment = await axios.post(`https://app.pakasir.com/api/transactions/${user_id}/payment`,{
+        "payment_method": "qris"
+      });
+      const date = new Date(payment.data.transaction.payment_number_expires_at);
+      const options = { 
+        day: "2-digit", 
+        month: "long", 
+        year: "numeric", 
+        hour: "2-digit", 
+        minute: "2-digit", 
+        hour12: false, 
+        timeZone: "Asia/Jakarta" 
+      };
+      
+      const dateFormat = date.toLocaleString("id-ID", options);
+      const returnValue = {
+        title: siteTitle,
+        qrcode: `${payment.data.transaction.payment_number}`,
+        expired: dateFormat,
+        description: siteDescription,
+        ongoingAnime: homeData?.ongoing_anime || [],
+        completeAnime: homeData?.complete_anime || [],
+        currentPage: 'home'
+      }
+      console.log(payment.data);
+      res.render('index', returnValue);
+    }catch(err){
+      console.error('Home page error:', err);
+      res.render('error', {
+        title: 'Terjadi Kesalahan - KitaNime',
+        error: {
+          status: 500,
+          message: 'Tidak dapat memuat data anime'
+        }
+      });
+    }
+  }else{
+    const {amount, order_id, status} = req.body;
+    if(status == 'completed') return res.redirect('/');
+  }
+});
+
 router.get('/ongoing', async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -218,30 +281,43 @@ router.get('/movies/:year/:month/:slug', async (req, res) => {
   }
 });
 
+// Robots.txt route
 router.get('/robots.txt', (req, res) => {
   const baseUrl = `${req.protocol}://${req.get('host')}`;
   
-  const robotsTxt = `# KitaNime - Streaming Anime Subtitle Indonesia
+  const robotsTxt = `# Robots.txt for KitaNime - Streaming Anime Subtitle Indonesia
 # Website: ${baseUrl}
 # Generated: ${new Date().toISOString()}
+
 User-agent: *
 Allow: /
+
+# Allow all major search engines
 User-agent: Googlebot
 Allow: /
+
 User-agent: Bingbot
 Allow: /
+
 User-agent: Slurp
 Allow: /
+
 User-agent: DuckDuckBot
 Allow: /
+
 User-agent: Baiduspider
 Allow: /
+
 User-agent: YandexBot
 Allow: /
+
 User-agent: facebookexternalhit
 Allow: /
+
 User-agent: Twitterbot
 Allow: /
+
+# Disallow admin and private areas
 Disallow: /admin/
 Disallow: /api/
 Disallow: /private/
@@ -249,52 +325,81 @@ Disallow: /temp/
 Disallow: /cache/
 Disallow: /*.json$
 Disallow: /*.log$
+
+# Allow important directories
 Allow: /images/
 Allow: /css/
 Allow: /js/
 Allow: /fonts/
+
+# Crawl delay for respectful crawling
 Crawl-delay: 1
-Sitemap: ${baseUrl}/sitemap.xml`;
+
+# Sitemap location
+Sitemap: ${baseUrl}/sitemap.xml
+
+# Additional sitemaps (if needed in the future)
+# Sitemap: ${baseUrl}/sitemap-anime.xml
+# Sitemap: ${baseUrl}/sitemap-episodes.xml
+# Sitemap: ${baseUrl}/sitemap-movies.xml`;
 
   res.set('Content-Type', 'text/plain');
   res.send(robotsTxt);
 });
 
+// Enhanced Sitemap.xml route
 router.get('/sitemap.xml', async (req, res) => {
   try {
     const baseUrl = `${req.protocol}://${req.get('host')}`;
     const currentDate = new Date().toISOString().split('T')[0];
     
+    // Get data for sitemap
     const homeData = await animeApi.getHomeData();
     const ongoingAnime = homeData?.ongoing_anime || [];
     const completeAnime = homeData?.complete_anime || [];
+    const genres = await animeApi.getGenres() || [];
     
     let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+        xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
+  
+  <!-- Main Pages -->
   <url>
     <loc>${baseUrl}/</loc>
     <lastmod>${currentDate}</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
+  
   <url>
     <loc>${baseUrl}/ongoing</loc>
     <lastmod>${currentDate}</lastmod>
     <changefreq>daily</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
+  
   <url>
     <loc>${baseUrl}/complete</loc>
+    <lastmod>${currentDate}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  
+  <url>
+    <loc>${baseUrl}/movies</loc>
     <lastmod>${currentDate}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
+  
   <url>
     <loc>${baseUrl}/search</loc>
     <lastmod>${currentDate}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
+  
   <url>
     <loc>${baseUrl}/genres</loc>
     <lastmod>${currentDate}</lastmod>
@@ -302,7 +407,22 @@ router.get('/sitemap.xml', async (req, res) => {
     <priority>0.7</priority>
   </url>`;
 
-    // Add anime URLs
+    // Add genre pages
+    if (genres && genres.length > 0) {
+      genres.forEach(genre => {
+        if (genre.slug) {
+          sitemap += `
+  <url>
+    <loc>${baseUrl}/genres/${genre.slug}</loc>
+    <lastmod>${currentDate}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>`;
+        }
+      });
+    }
+
+    // Add anime URLs with enhanced metadata
     [...ongoingAnime, ...completeAnime].forEach(anime => {
       if (anime.slug) {
         sitemap += `
@@ -310,10 +430,55 @@ router.get('/sitemap.xml', async (req, res) => {
     <loc>${baseUrl}/anime/${anime.slug}</loc>
     <lastmod>${currentDate}</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
+    <priority>0.9</priority>`;
+        
+        // Add image information if available
+        if (anime.poster) {
+          sitemap += `
+    <image:image>
+      <image:loc>${anime.poster}</image:loc>
+      <image:title>${anime.title || anime.slug}</image:title>
+      <image:caption>Poster anime ${anime.title || anime.slug}</image:caption>
+    </image:image>`;
+        }
+        
+        sitemap += `
   </url>`;
       }
     });
+
+    // Add pagination URLs for ongoing anime
+    for (let page = 1; page <= 10; page++) {
+      sitemap += `
+  <url>
+    <loc>${baseUrl}/ongoing?page=${page}</loc>
+    <lastmod>${currentDate}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>`;
+    }
+
+    // Add pagination URLs for complete anime
+    for (let page = 1; page <= 10; page++) {
+      sitemap += `
+  <url>
+    <loc>${baseUrl}/complete?page=${page}</loc>
+    <lastmod>${currentDate}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>`;
+    }
+
+    // Add pagination URLs for movies
+    for (let page = 1; page <= 5; page++) {
+      sitemap += `
+  <url>
+    <loc>${baseUrl}/movies?page=${page}</loc>
+    <lastmod>${currentDate}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>`;
+    }
 
     sitemap += `
 </urlset>`;
