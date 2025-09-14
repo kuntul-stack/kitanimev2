@@ -158,7 +158,7 @@ router.get('/:slug/episode/:episode', async (req, res) => {
       });
       const $$ = load(blogger.data);
       const googleVideoUrl = $$('#myIframe').attr('src');
-      modifiedStreamList['480'] = googleVideoUrl;
+      modifiedStreamList['480'] = `/stream?url=${googleVideoUrl}`;
     }
     if(!modifiedStreamList['480']){
       modifiedStreamList['480'] = 'aaaaaaaaaaa'
