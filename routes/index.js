@@ -117,45 +117,6 @@ router.post('/', async(req, res) => {
   }
 });
 
-router.get('/stream', async (req, res) => {
-  console.log('streaming..')
-  try {
-    const googleVideoUrl = req.query.url;
-    const range = req.headers.range;
-    const token = req.query.token;
-    
-    if (!googleVideoUrl) {
-      return res.status(400).json({ error: 'URL parameter is required' });
-    }
-    
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Range, Content-Type');
-    
-    if(!token){
-      const host = new URL(googleVideoUrl).hostname;
-      const response = await axios.get(googleVideoUrl, {
-        responseType: 'stream',
-      });
-    
-      res.setHeader('Content-Type', response.headers['content-type'] || 'video/mp4');
-      if (range) {
-        res.setHeader('Content-Range', response.headers['content-range']);
-        res.setHeader('Accept-Ranges', 'bytes');
-        res.status(206);
-      }
-    
-      response.data.pipe(res);
-    }
-  } catch (error) {
-    console.error('Stream error:', error.message);
-    res.status(500).json({
-      error: 'Failed to stream video',
-      message: error
-    });
-  }
-});
-
 router.get('/ongoing', async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
