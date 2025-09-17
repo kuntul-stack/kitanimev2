@@ -157,8 +157,25 @@ router.get('/:slug/episode/:episode', async (req, res) => {
         },
       });
       const $$ = load(blogger.data);
-      const googleVideoUrl = $$('#myIframe').attr('src');
-      modifiedStreamList['480'] = `/stream?url=${googleVideoUrl}`;
+      const scriptContent = $$("script").map((_, el) => $(el).html()).get().find(txt => txt.includes("var vs = {"));
+      if (!scriptContent) {
+        console.log("ga ketemu vs");
+        return;
+      }
+      match = scriptContent.match(/var\s+vs\s*=\s*(\{[\s\S]*?\});/);
+      if (!match) {
+        console.log("vs object ga ketemu");
+        return;
+      }
+      let googleVideoUrl;
+      try{
+        const jsonLike = match[1].replace(/(\w+):/g, '"$1":').replace(/,(\s*[}\]])/g, "$1");
+        vs = JSON.parse(jsonLike);
+      } catch (e) {
+        console.error("parse error", e);
+        return;
+      }
+      modifiedStreamList['480'] = `/stream?url=${googleVideoUrl.file}`;
     }
     if(!modifiedStreamList['480']){
       modifiedStreamList['480'] = 'aaaaaaaaaaa'
