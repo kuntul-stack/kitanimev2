@@ -133,7 +133,7 @@ router.get('/stream', async (req, res) => {
     res.setHeader('Access-Control-Allow-Headers', 'Range, Content-Type');
     
     if(!token){
-      const match = await getSourceVideo(googleVideoUrl);
+      const match = googleVideoUrl;
       const Referer = new URL(googleVideoUrl).host;
       console.log(Referer)
       const host = new URL(match[0].play_url).hostname;
