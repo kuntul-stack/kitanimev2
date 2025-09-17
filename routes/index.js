@@ -169,7 +169,7 @@ router.get('/stream', async (req, res) => {
   }
 });
 
-app.get("/gdrive/:vid", async (req, res) => {
+router.get("/gdrive/:vid", async (req, res) => {
   const {vid} = req.params;
   try {
     const gdriveUrl = `https://docs.google.com/uc?export=download&id=${vid}`;
