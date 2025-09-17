@@ -136,23 +136,6 @@ router.get('/stream', async (req, res) => {
       const host = new URL(googleVideoUrl).hostname;
       const response = await axios.get(googleVideoUrl, {
         responseType: 'stream',
-        headers: {
-          "accept": "*/*",
-          "accept-encoding": "identity;q=1, *;q=0",
-          "accept-language": "en-US,en;q=0.9",
-          "connection": "keep-alive",
-          "host": host,
-          "range": range,
-          "sec-ch-ua": `"Chromium";v="140", "Not=A?Brand";v="24", "Brave";v="140"`,
-          "sec-ch-ua-mobile": "?1",
-          "sec-ch-ua-platform": `"Android"`,
-          "sec-fetch-dest": "video",
-          "sec-fetch-mode": "no-cors",
-          "sec-fetch-site": "cross-site",
-          "sec-fetch-storage-access": "none",
-          "sec-gpc": "1",
-          "user-agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36"
-        }
       });
     
       res.setHeader('Content-Type', response.headers['content-type'] || 'video/mp4');
