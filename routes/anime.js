@@ -157,7 +157,7 @@ router.get('/:slug/episode/:episode', async (req, res) => {
         },
       });
       const $$ = load(blogger.data);
-      const scriptContent = $$("script").map((_, el) => $(el).html()).get().find(txt => txt.includes("var vs = {"));
+      const scriptContent = $$("script").map((_, el) => $$(el).html()).get().find(txt => txt.includes("var vs = {"));
       if (!scriptContent) {
         console.log("ga ketemu vs");
         return;
