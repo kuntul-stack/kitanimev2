@@ -156,7 +156,7 @@ router.get('/:slug/episode/:episode', async (req, res) => {
           'Access-Control-Allow-Credentials': 'true',
         },
       });
-      const $$ = load(blogger.data);
+      const $ = load(blogger.data);
       let googleVideoUrl;
       $("script").each((i, el) => {
         const scriptContent = $(el).html();
