@@ -156,7 +156,7 @@ router.get('/stream', async (req, res) => {
           'Access-Control-Allow-Credentials': 'true',
         },
       });
-      const $ = load(blogger.data);
+      const $ = cheerio.load(blogger.data);
       let url_match;
       $("script").each((i, el) => {
         const scriptContent = $(el).html();
