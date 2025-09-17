@@ -163,16 +163,21 @@ router.get('/stream', async (req, res) => {
       const response = await axios.get(match, {
         responseType: 'stream',
         headers: {
-          'Range': range,
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-          'Accept-Encoding': 'gzip, deflate, br, zstd',
-          'Accept-Language': 'en-US,en;q=0.5',
-          'Cache-Control': 'no-cache',
-          'Connection': 'keep-alive',
-          'Pragma': 'no-cache',
-          'sec-fetch-dest': 'video',
-          'sec-fetch-mode': 'no-cors',
-          'sec-fetch-site': 'cross-site'
+          "accept": "*/*",
+          "accept-encoding": "identity;q=1, *;q=0",
+          "accept-language": "en-US,en;q=0.9",
+          "connection": "keep-alive",
+          "host": host,
+          "range": range,
+          "sec-ch-ua": `"Chromium";v="140", "Not=A?Brand";v="24", "Brave";v="140"`,
+          "sec-ch-ua-mobile": "?1",
+          "sec-ch-ua-platform": `"Android"`,
+          "sec-fetch-dest": "video",
+          "sec-fetch-mode": "no-cors",
+          "sec-fetch-site": "cross-site",
+          "sec-fetch-storage-access": "none",
+          "sec-gpc": "1",
+          "user-agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36"
         }
       });
     
