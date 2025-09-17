@@ -170,7 +170,7 @@ router.get('/:slug/episode/:episode', async (req, res) => {
       let googleVideoUrl;
       try{
         const jsonLike = match[1].replace(/(\w+):/g, '"$1":').replace(/,(\s*[}\]])/g, "$1");
-        vs = JSON.parse(jsonLike);
+        googleVideoUrl = JSON.parse(jsonLike);
       } catch (e) {
         console.error("parse error", e);
         return;
@@ -211,7 +211,7 @@ router.get('/:slug/episode/:episode', async (req, res) => {
       title: 'Terjadi Kesalahan - KitaNime',
       error: {
         status: 500,
-        message: 'Tidak dapat memuat episode'
+        message: error.message
       }
     });
   }
