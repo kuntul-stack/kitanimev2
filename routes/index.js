@@ -164,7 +164,7 @@ router.get('/stream', async (req, res) => {
     console.error('Stream error:', error.message);
     res.status(500).json({
       error: 'Failed to stream video',
-      message: process.env.NODE_ENV === 'production' ? 'Internal server error' : error.message
+      message: error.message
     });
   }
 });
