@@ -136,8 +136,8 @@ router.get('/stream', async (req, res) => {
       const match = googleVideoUrl;
       const Referer = new URL(googleVideoUrl).host;
       console.log(Referer)
-      const host = new URL(match[0].play_url).hostname;
-      const response = await axios.get(match[0].play_url, {
+      const host = new URL(match).hostname;
+      const response = await axios.get(match, {
         responseType: 'stream',
         headers: {
           'Range': range,
