@@ -181,7 +181,9 @@ router.get('/stream', async (req, res) => {
           'Cache-Control': 'no-cache',
           'Connection': 'keep-alive',
           'Pragma': 'no-cache',
-          'Referer': `https://${Referer}`
+          'sec-fetch-dest': 'video',
+          'sec-fetch-mode': 'no-cors',
+          'sec-fetch-site': 'cross-site'
         }
       });
     
