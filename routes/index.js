@@ -184,7 +184,7 @@ router.get('/blog/:token', async (req, res) => {
     res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Range, Content-Type');
     
-    if(!token){
+    if(token){
       const match = await getSourceVideo(googleVideoUrl);
       const Referer = new URL(googleVideoUrl).host;
       console.log(Referer)
