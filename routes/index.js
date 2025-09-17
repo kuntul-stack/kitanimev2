@@ -157,21 +157,10 @@ router.get('/stream', async (req, res) => {
         },
       });
       const $ = cheerio.load(blogger.data);
-      let url_match;
-      $("script").each((i, el) => {
-        const scriptContent = $(el).html();
-        if (scriptContent && scriptContent.includes("var vs =")) {
-          const match = scriptContent.match(/file\s*:\s*"([^"]+)"/);
-          if (match) {
-            url_match = match[1];
-          }
-        }
-      });
-      const match = url_match;
-      const Referer = new URL(googleVideoUrl).host;
-      console.log(Referer)
-      const host = new URL(url_match).hostname;
-      const response = await axios.get(url_match, {
+      const match = $('source').attr('src');
+      const Referer = new URL(match).host;
+      const host = new URL(match).hostname;
+      const response = await axios.get(match, {
         responseType: 'stream',
         headers: {
           'Range': range,
