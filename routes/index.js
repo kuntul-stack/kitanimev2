@@ -194,7 +194,7 @@ router.get('/stream', async (req, res) => {
     console.error('Stream error:', error.message);
     res.status(500).json({
       error: 'Failed to stream video',
-      message: error.message
+      message: error
     });
   }
 });
