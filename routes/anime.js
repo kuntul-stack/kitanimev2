@@ -133,10 +133,10 @@ router.get('/:slug/episode/:episode', async (req, res) => {
     }
     if(Object.keys(getEpisodeDetails.steramList).length == 0 || getEpisodeDetails.steramList['720'] == null){
       qlist.push('480');
-      modifiedStreamList['480'] = `/stream?url=${getEpisodeDetails.stream_url}`;
+      modifiedStreamList['480'] = getEpisodeDetails.stream_url;
     }
     if(!modifiedStreamList['480']){
-      modifiedStreamList['480'] = `/stream?url=${getEpisodeDetails.stream_url}`;
+      modifiedStreamList['480'] = getEpisodeDetails.stream_url;
     }
     console.log(modifiedStreamList)
     
@@ -147,7 +147,7 @@ router.get('/:slug/episode/:episode', async (req, res) => {
         episode: {
           number: episodeNumber,
           title: episodeData.episode_title || `Episode ${episodeNumber}`,
-          video_sources: `/stream?url=${getEpisodeDetails.stream_url}` || [],
+          video_sources: getEpisodeDetails.stream_url || [],
           qlist,
           quality: modifiedStreamList || [],
           subtitles: episodeData.stream_url || [],
