@@ -133,7 +133,7 @@ router.get('/:slug/episode/:episode', async (req, res) => {
     }
     if(Object.keys(getEpisodeDetails.steramList).length == 0){
       qlist.push('480');
-      const blogger = await axios.get(getEpisodeDetails.stream_url, {
+      const blogger = await axios.get(getEpisodeDetails.stream_url.replace('/v3/','/'), {
         headers: {
           'Host': 'desustream.info',
           'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
