@@ -169,6 +169,26 @@ router.get('/stream', async (req, res) => {
   }
 });
 
+app.get("/gdrive/:vid", async (req, res) => {
+  const {vid} = req.params;
+  try {
+    const gdriveUrl = `https://docs.google.com/uc?export=download&id=${vid}`;
+    const response = await axios({
+      url: gdriveUrl,
+      method: "GET",
+      responseType: "stream",
+    });
+
+    res.setHeader("Access-Control-Allow-Origin", "*"); // fix CORS
+    res.setHeader("Content-Type", "video/mp4");
+
+    response.data.pipe(res);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Error streaming");
+  }
+});
+
 router.get('/ongoing', async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
