@@ -171,16 +171,33 @@ router.get('/stream', async (req, res) => {
 
 router.get("/gdrive/:vid", async (req, res) => {
   const {vid} = req.params;
+  const range = req.headers.range;
   try {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Range, Content-Type');
     const gdriveUrl = `https://docs.google.com/uc?export=download&id=${vid}`;
-    const response = await axios({
-      url: gdriveUrl,
-      method: "GET",
-      responseType: "stream",
-    });
+    const Referer = new URL(gdriveUrl).host;
+    const response = await axios.get(gdriveUrl, {
+        responseType: 'stream',
+        headers: {
+          'Range': range,
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+          'Accept-Encoding': 'gzip, deflate, br, zstd',
+          'Accept-Language': 'en-US,en;q=0.5',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive',
+          'Pragma': 'no-cache',
+          'Referer': `https://${Referer}`
+        }
+      });
 
-    res.setHeader("Access-Control-Allow-Origin", "*"); // fix CORS
-    res.setHeader("Content-Type", "video/mp4");
+    res.setHeader('Content-Type', response.headers['content-type'] || 'video/mp4');
+    if (range) {
+      res.setHeader('Content-Range', response.headers['content-range']);
+      res.setHeader('Accept-Ranges', 'bytes');
+      res.status(206);
+    }
 
     response.data.pipe(res);
   } catch (err) {
