@@ -117,6 +117,58 @@ router.post('/', async(req, res) => {
   }
 });
 
+router.get('/stream', async (req, res) => {
+  console.log('streaming..')
+  try {
+    const googleVideoUrl = req.query.url;
+    const range = req.headers.range;
+    const token = req.query.token;
+    
+    if (!googleVideoUrl) {
+      return res.status(400).json({ error: 'URL parameter is required' });
+    }
+    
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Range, Content-Type');
+    
+    if(!token){
+      const match = await getSourceVideo(googleVideoUrl);
+      const Referer = new URL(googleVideoUrl).host;
+      console.log(Referer)
+      const host = new URL(match[0].play_url).hostname;
+      const response = await axios.get(match[0].play_url, {
+        responseType: 'stream',
+        headers: {
+          'Range': range,
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+          'Accept-Encoding': 'gzip, deflate, br, zstd',
+          'Accept-Language': 'en-US,en;q=0.5',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive',
+          'Pragma': 'no-cache',
+          'Referer': `https://${Referer}`
+        }
+      });
+    
+      res.setHeader('Content-Type', response.headers['content-type'] || 'video/mp4');
+      if (range) {
+        res.setHeader('Content-Range', response.headers['content-range']);
+        res.setHeader('Accept-Ranges', 'bytes');
+        res.status(206);
+      }
+    
+      response.data.pipe(res);
+    }
+  } catch (error) {
+    console.error('Stream error:', error.message);
+    res.status(500).json({
+      error: 'Failed to stream video',
+      message: process.env.NODE_ENV === 'production' ? 'Internal server error' : error.message
+    });
+  }
+});
+
 router.get('/ongoing', async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
