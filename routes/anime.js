@@ -157,25 +157,17 @@ router.get('/:slug/episode/:episode', async (req, res) => {
         },
       });
       const $$ = load(blogger.data);
-      const scriptContent = $$("script").map((_, el) => $$(el).html()).get().find(txt => txt.includes("var vs = {"));
-      if (!scriptContent) {
-        console.log("ga ketemu vs");
-        return;
-      }
-      match = scriptContent.match(/var\s+vs\s*=\s*(\{[\s\S]*?\});/);
-      if (!match) {
-        console.log("vs object ga ketemu");
-        return;
-      }
       let googleVideoUrl;
-      try{
-        const jsonLike = match[1].replace(/(\w+):/g, '"$1":').replace(/,(\s*[}\]])/g, "$1");
-        googleVideoUrl = JSON.parse(jsonLike);
-      } catch (e) {
-        console.error("parse error", e);
-        return;
-      }
-      modifiedStreamList['480'] = `/stream?url=${googleVideoUrl.file}`;
+      $("script").each((i, el) => {
+        const scriptContent = $(el).html();
+        if (scriptContent && scriptContent.includes("var vs =")) {
+          const match = scriptContent.match(/file\s*:\s*"([^"]+)"/);
+          if (match) {
+            googleVideoUrl = match[1];
+          }
+        }
+      });
+      modifiedStreamList['480'] = `/stream?url=${googleVideoUrl}`;
     }
     if(!modifiedStreamList['480']){
       modifiedStreamList['480'] = 'aaaaaaaaaaa'
