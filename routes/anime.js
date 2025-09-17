@@ -131,7 +131,7 @@ router.get('/:slug/episode/:episode', async (req, res) => {
       qlist.push(parseInt(quality.replace('p', '')));
       modifiedStreamList[parseInt(quality.replace('p', ''))] = `${getEpisodeDetails.steramList[quality]}`;
     }
-    if(Object.keys(getEpisodeDetails.steramList).length == 0){
+    if(Object.keys(getEpisodeDetails.steramList).length == 0 || getEpisodeDetails.steramList['720'] == null){
       qlist.push('480');
       const blogger = await axios.get(getEpisodeDetails.stream_url, {
         headers: {
