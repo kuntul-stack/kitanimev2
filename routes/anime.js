@@ -133,7 +133,7 @@ router.get('/:slug/episode/:episode', async (req, res) => {
     }
     if(Object.keys(getEpisodeDetails.steramList).length == 0){
       qlist.push('480');
-      modifiedStreamList['480'] = `${getEpisodeDetails.stream_url}`;
+      modifiedStreamList['480'] = `/stream?url=${getEpisodeDetails.stream_url}`;
     }
     if(!modifiedStreamList['480']){
       modifiedStreamList['480'] = 'aaaaaaaaaaa'
