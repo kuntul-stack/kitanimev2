@@ -133,7 +133,7 @@ router.get('/stream', async (req, res) => {
     res.setHeader('Access-Control-Allow-Headers', 'Range, Content-Type');
     
     if(!token){
-      const blogger = await axios.get(getEpisodeDetails.stream_url.replace('/v3/','/'), {
+      const blogger = await axios.get(googleVideoUrl, {
         headers: {
           'Host': 'desustream.info',
           'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
