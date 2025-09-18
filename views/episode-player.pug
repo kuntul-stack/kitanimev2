@@ -63,7 +63,7 @@ block content
                 a(href=`/anime/${anime.slug}/episode/${navigation.prev}` class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 text-gray-700 dark:text-gray-200 rounded-xl hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-600 dark:hover:to-gray-500 transition-all duration-200 transform hover:scale-105 shadow-md")
                   svg(class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24")
                     path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7")
-                  
+                  span(class="font-medium") -
               else
                 div(class="text-gray-400 dark:text-gray-500 font-medium")First
             
@@ -76,9 +76,10 @@ block content
             div(class="flex-1 text-right")
               if navigation.isNext
                 a(href=`/anime/${anime.slug}/episode/${navigation.next}` class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-primary-600 to-primary-700 dark:from-primary-500 dark:to-primary-600 text-white rounded-xl hover:from-primary-700 hover:to-primary-800 dark:hover:from-primary-600 dark:hover:to-primary-700 transition-all duration-200 transform hover:scale-105 shadow-lg")
-                  
+                  span(class="font-medium") -
                   svg(class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24")
                     path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7")
+                  
               else
                 div(class="text-gray-400 dark:text-gray-500 font-medium") End
 
