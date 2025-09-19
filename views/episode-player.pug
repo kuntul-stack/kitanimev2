@@ -23,7 +23,7 @@ block content
 
           div(class="h-full")
             if episode.quality
-              video(id="player" class="aspect-video w-full h-full" preload="metadata" poster=anime.poster crossorigin="anonymous" playsinline allow="autoplay" data-plyr-config='{"autoplay": false, "muted": true}')
+              video(id="player" class="aspect-video w-full h-full" preload="metadata" poster='/images/poster.png' crossorigin="anonymous" playsinline allow="autoplay" data-plyr-config='{"autoplay": false, "muted": true}')
                 if episode.video_sources
                   if Array.isArray(episode.video_sources)
                     each source in episode.video_sources
@@ -373,8 +373,7 @@ block scripts
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
             </svg>
           </div>
-          <h3 class="text-xl font-bold mb-3">Video Tidak Dapat Dimuat</h3>
-          <p class="text-gray-300 mb-4 max-w-md mx-auto">Terjadi kesalahan saat memuat video. Silakan coba lagi atau pilih server lain.</p>
+          <p class="text-gray-300 mb-4 max-w-md mx-auto">Terjadi kesalahan saat memuat video. Silakan coba lagi.</p>
           <button onclick="location.reload()" class="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-xl font-medium transition-colors duration-200">
             Muat Ulang
           </button>
