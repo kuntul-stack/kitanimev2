@@ -135,7 +135,7 @@ class AnimeApiService {
   }
 
   async getEpisodeDetails(slug, episode) {
-    return await this.makeRequest(`/anime/${slug}/episodes/${episode}`);
+    return await this.makeRequest(`/anime/${slug}/episodes/${episode == 0 ? 1 : episode}`);
   }
 
   async searchAnime(keyword, page = 1) {
