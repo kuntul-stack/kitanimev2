@@ -1,11 +1,10 @@
 const session = require('express-session');
-const path = require('path');
+const pgSession = require('connect-pg-simple')(session);
 
-// Session configuration
 function createSessionConfig() {
   const isProduction = process.env.NODE_ENV === 'production';
   const isVercel = process.env.VERCEL === '1';
-  
+
   const baseConfig = {
     secret: process.env.SESSION_SECRET || 'kitanime-secret-key-change-in-production',
     resave: false,
@@ -13,38 +12,34 @@ function createSessionConfig() {
     cookie: {
       secure: isProduction,
       httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      maxAge: 24 * 60 * 60 * 1000,
       sameSite: isProduction ? 'strict' : 'lax'
     },
     name: 'kitanime.sid'
   };
 
-  // Use SQLite store for production and Vercel deployment
-  if (isProduction || isVercel) {
+  const supabaseUrl = process.env.VITE_SUPABASE_URL;
+  const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
+
+  if (supabaseUrl && supabaseKey) {
+    const supabaseProjectRef = supabaseUrl.match(/https:\/\/([^.]+)\.supabase\.co/)?.[1];
+    const connectionString = `postgresql://postgres.${supabaseProjectRef}:${process.env.SUPABASE_DB_PASSWORD || ''}@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres`;
+
     try {
-      const SQLiteStore = require('connect-sqlite3')(session);
-      
-      // For Vercel, use /tmp directory which is writable
-      const dbPath = isVercel 
-        ? '/tmp/sessions.db' 
-        : path.join(__dirname, '..', 'data', 'sessions.db');
-      
-      baseConfig.store = new SQLiteStore({
-        db: 'sessions.db',
-        dir: isVercel ? '/tmp' : path.join(__dirname, '..', 'data'),
-        concurrentDB: true,
-        table: 'sessions',
-        // Clear expired sessions every hour
-        clearInterval: 3600000
+      baseConfig.store = new pgSession({
+        conString: connectionString,
+        tableName: 'sessions',
+        createTableIfMissing: false,
+        ttl: 24 * 60 * 60
       });
 
-      console.log(`Using SQLite session store at: ${dbPath}`);
+      console.log('Using PostgreSQL session store with Supabase');
     } catch (error) {
-      console.error('Failed to initialize SQLite session store:', error);
-      console.log('Falling back to MemoryStore (not recommended for production)');
+      console.error('Failed to initialize PostgreSQL session store:', error);
+      console.log('Falling back to MemoryStore');
     }
   } else {
-    console.log('Using MemoryStore for development environment');
+    console.log('Using MemoryStore for sessions');
   }
 
   return baseConfig;

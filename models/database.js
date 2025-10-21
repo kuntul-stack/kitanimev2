@@ -1,247 +1,179 @@
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
+const supabase = require('../config/supabase');
 const bcrypt = require('bcrypt');
 
-const dbPath = path.join(__dirname, '..', 'data', 'kitanime.db');
-
-const db = new sqlite3.Database(dbPath, (err) => {
-  if (err) {
-    console.error('Error opening database:', err.message);
-  } else {
-    console.log('Connected to SQLite database');
-  }
-});
-
 async function initializeDatabase() {
-  return new Promise((resolve, reject) => {
-    db.serialize(() => {
+  try {
+    const { count, error } = await supabase
+      .from('admin_users')
+      .select('*', { count: 'exact', head: true });
 
-      db.run(`CREATE TABLE IF NOT EXISTS api_endpoints (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL UNIQUE,
-        url TEXT NOT NULL,
-        is_active INTEGER DEFAULT 0,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      )`);
+    if (error && error.code !== 'PGRST116') {
+      throw error;
+    }
 
-      db.run(`CREATE TABLE IF NOT EXISTS ad_slots (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        position TEXT NOT NULL,
-        type TEXT NOT NULL CHECK(type IN ('adsense', 'banner')),
-        content TEXT NOT NULL,
-        is_active INTEGER DEFAULT 1,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      )`);
+    if (count === 0) {
+      const hashedPassword = await bcrypt.hash('admin123', 10);
+      await supabase
+        .from('admin_users')
+        .update({ password_hash: hashedPassword })
+        .eq('username', 'admin');
+    }
 
-      db.run(`CREATE TABLE IF NOT EXISTS admin_users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT NOT NULL UNIQUE,
-        password_hash TEXT NOT NULL,
-        email TEXT,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      )`);
-
-      db.run(`CREATE TABLE IF NOT EXISTS settings (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        key TEXT NOT NULL UNIQUE,
-        value TEXT,
-        description TEXT,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      )`);
-
-      insertDefaultData()
-        .then(() => resolve())
-        .catch(reject);
-    });
-  });
-}
-
-async function insertDefaultData() {
-  return new Promise((resolve, reject) => {
-
-    db.get("SELECT COUNT(*) as count FROM api_endpoints", (err, row) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-
-      if (row.count === 0) {
-        db.run(`INSERT INTO api_endpoints (name, url, is_active) VALUES
-          ('Default API', 'http://localhost:3000/v1', 1)`);
-      }
-    });
-
-    db.get("SELECT COUNT(*) as count FROM admin_users", async (err, row) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-
-      if (row.count === 0) {
-        try {
-          const hashedPassword = await bcrypt.hash('admin123', 10);
-          db.run(`INSERT INTO admin_users (username, password_hash, email) VALUES
-            ('admin', ?, 'admin@kitanime.com')`, [hashedPassword]);
-        } catch (error) {
-          reject(error);
-          return;
-        }
-      }
-    });
-
-    db.get("SELECT COUNT(*) as count FROM ad_slots", (err, row) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-
-      if (row.count === 0) {
-        db.run(`INSERT INTO ad_slots (name, position, type, content, is_active) VALUES
-          ('Header Banner', 'header', 'banner', '<img src="/images/ads/header-banner.jpg" alt="Advertisement" class="w-full h-20 object-cover rounded-lg">', 1),
-          ('Sidebar Top', 'sidebar-top', 'adsense', '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-xxxxxxxxxx" data-ad-slot="xxxxxxxxxx" data-ad-format="auto"></ins>', 1),
-          ('Content Bottom', 'content-bottom', 'banner', '<img src="/images/ads/content-banner.jpg" alt="Advertisement" class="w-full h-32 object-cover rounded-lg">', 1)`);
-      }
-    });
-
-    db.get("SELECT COUNT(*) as count FROM settings", (err, row) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-
-      if (row.count === 0) {
-        db.run(`INSERT INTO settings (key, value, description) VALUES
-          ('site_title', 'KitaNime - Streaming Anime Subtitle Indonesia', 'Judul website'),
-          ('site_description', 'Nonton anime subtitle Indonesia terlengkap dan terbaru', 'Deskripsi website'),
-          ('cookie_consent_enabled', '1', 'Enable cookie consent popup'),
-          ('adsense_enabled', '0', 'Enable Google AdSense')`);
-      }
-
-      resolve();
-    });
-  });
+    console.log('Supabase database initialized successfully');
+    return true;
+  } catch (error) {
+    console.error('Error initializing database:', error);
+    throw error;
+  }
 }
 
 const dbHelpers = {
+  getActiveApiEndpoint: async () => {
+    const { data, error } = await supabase
+      .from('api_endpoints')
+      .select('url')
+      .eq('is_active', true)
+      .maybeSingle();
 
-  getActiveApiEndpoint: () => {
-    return new Promise((resolve, reject) => {
-      db.get("SELECT url FROM api_endpoints WHERE is_active = 1 LIMIT 1", (err, row) => {
-        if (err) reject(err);
-        else resolve(row ? row.url : null);
-      });
-    });
+    if (error) throw error;
+    return data ? data.url : null;
   },
 
-  getAllApiEndpoints: () => {
-    return new Promise((resolve, reject) => {
-      db.all("SELECT * FROM api_endpoints ORDER BY created_at DESC", (err, rows) => {
-        if (err) reject(err);
-        else resolve(rows);
-      });
-    });
+  getAllApiEndpoints: async () => {
+    const { data, error } = await supabase
+      .from('api_endpoints')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
   },
 
-  updateApiEndpoint: (id, url, isActive) => {
-    return new Promise((resolve, reject) => {
-      db.serialize(() => {
-        if (isActive) {
+  updateApiEndpoint: async (id, url, isActive) => {
+    if (isActive) {
+      await supabase
+        .from('api_endpoints')
+        .update({ is_active: false })
+        .neq('id', id);
+    }
 
-          db.run("UPDATE api_endpoints SET is_active = 0");
-        }
+    const { error } = await supabase
+      .from('api_endpoints')
+      .update({
+        url,
+        is_active: isActive,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id);
 
-        db.run("UPDATE api_endpoints SET url = ?, is_active = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
-          [url, isActive ? 1 : 0, id], function(err) {
-          if (err) reject(err);
-          else resolve(this.changes);
-        });
-      });
-    });
+    if (error) throw error;
+    return true;
   },
 
-  getAdSlotsByPosition: (position) => {
-    return new Promise((resolve, reject) => {
-      db.all("SELECT * FROM ad_slots WHERE position = ? AND is_active = 1", [position], (err, rows) => {
-        if (err) reject(err);
-        else resolve(rows);
-      });
-    });
+  getAdSlotsByPosition: async (position) => {
+    const { data, error } = await supabase
+      .from('ad_slots')
+      .select('*')
+      .eq('position', position)
+      .eq('is_active', true);
+
+    if (error) throw error;
+    return data || [];
   },
 
-  getAllAdSlots: () => {
-    return new Promise((resolve, reject) => {
-      db.all("SELECT * FROM ad_slots ORDER BY position, created_at DESC", (err, rows) => {
-        if (err) reject(err);
-        else resolve(rows);
-      });
-    });
+  getAllAdSlots: async () => {
+    const { data, error } = await supabase
+      .from('ad_slots')
+      .select('*')
+      .order('position')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
   },
 
-  addAdSlot: (name, position, type, content, isActive) => {
-    return new Promise((resolve, reject) => {
-      db.run("INSERT INTO ad_slots (name, position, type, content, is_active) VALUES (?, ?, ?, ?, ?)",
-        [name, position, type, content, isActive ? 1 : 0], function(err) {
-        if (err) reject(err);
-        else resolve(this.lastID);
-      });
-    });
+  addAdSlot: async (name, position, type, content, isActive) => {
+    const { data, error } = await supabase
+      .from('ad_slots')
+      .insert({
+        name,
+        position,
+        type,
+        content,
+        is_active: isActive
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data.id;
   },
 
-  updateAdSlot: (id, name, position, type, content, isActive) => {
-    return new Promise((resolve, reject) => {
-      db.run("UPDATE ad_slots SET name = ?, position = ?, type = ?, content = ?, is_active = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
-        [name, position, type, content, isActive ? 1 : 0, id], function(err) {
-        if (err) reject(err);
-        else resolve(this.changes);
-      });
-    });
+  updateAdSlot: async (id, name, position, type, content, isActive) => {
+    const { error } = await supabase
+      .from('ad_slots')
+      .update({
+        name,
+        position,
+        type,
+        content,
+        is_active: isActive,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id);
+
+    if (error) throw error;
+    return true;
   },
 
-  deleteAdSlot: (id) => {
-    return new Promise((resolve, reject) => {
-      db.run("DELETE FROM ad_slots WHERE id = ?", [id], function(err) {
-        if (err) reject(err);
-        else resolve(this.changes);
-      });
-    });
+  deleteAdSlot: async (id) => {
+    const { error } = await supabase
+      .from('ad_slots')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+    return true;
   },
 
-  getAdminByUsername: (username) => {
-    return new Promise((resolve, reject) => {
-      db.get("SELECT * FROM admin_users WHERE username = ?", [username], (err, row) => {
-        if (err) reject(err);
-        else resolve(row);
-      });
-    });
+  getAdminByUsername: async (username) => {
+    const { data, error } = await supabase
+      .from('admin_users')
+      .select('*')
+      .eq('username', username)
+      .maybeSingle();
+
+    if (error) throw error;
+    return data;
   },
 
-  getSetting: (key) => {
-    return new Promise((resolve, reject) => {
-      db.get("SELECT value FROM settings WHERE key = ?", [key], (err, row) => {
-        if (err) reject(err);
-        else resolve(row ? row.value : null);
-      });
-    });
+  getSetting: async (key) => {
+    const { data, error } = await supabase
+      .from('settings')
+      .select('value')
+      .eq('key', key)
+      .maybeSingle();
+
+    if (error) throw error;
+    return data ? data.value : null;
   },
 
-  updateSetting: (key, value) => {
-    return new Promise((resolve, reject) => {
-      db.run("UPDATE settings SET value = ?, updated_at = CURRENT_TIMESTAMP WHERE key = ?",
-        [value, key], function(err) {
-        if (err) reject(err);
-        else resolve(this.changes);
-      });
-    });
+  updateSetting: async (key, value) => {
+    const { error } = await supabase
+      .from('settings')
+      .update({
+        value,
+        updated_at: new Date().toISOString()
+      })
+      .eq('key', key);
+
+    if (error) throw error;
+    return true;
   }
 };
 
 module.exports = {
-  db,
+  supabase,
   initializeDatabase,
   ...dbHelpers
 };
